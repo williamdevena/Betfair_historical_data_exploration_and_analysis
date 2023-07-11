@@ -7,6 +7,7 @@ from pprint import pprint
 import betfairutil
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from alive_progress import alive_it
 
 from src import constants, data_analysis, data_plotting, data_processing, utils
@@ -15,14 +16,14 @@ from src import constants, data_analysis, data_plotting, data_processing, utils
 def main():
     #start_time = time.time()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-        handlers=[
-            #logging.FileHandler("project_log/assignment.log"),
-            logging.StreamHandler()
-        ]
-    )
+    # logging.basicConfig(
+    #     level=logging.INFO,
+    #     format="%(message)s",
+    #     handlers=[
+    #         #logging.FileHandler("project_log/assignment.log"),
+    #         logging.StreamHandler()
+    #     ]
+    # )
 
     # file_dir = "/Users/william.devena/Desktop/UCL/RESEARCH PROJECT/QST/Data/PRO/2023/Jan/1/31993143"
     # file_name = "1.208134612"
@@ -109,15 +110,6 @@ def main():
     # pprint(dir_names)
 
 
-    # a = [1,2,3,4,454,9]
-    # with open('a.pkl', 'wb') as f:  # open a text file
-    #     pickle.dump(a, f) # serialize the list
-
-    # with open('a.pkl', 'rb') as f:
-    #     a = pickle.load(f) # deserialize using load()
-    #     print(a) # print student names
-
-
 
     # dir_path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/match_odds"
     # dict_data = {}
@@ -146,100 +138,41 @@ def main():
 
 
 
-    # path="/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
-
-    # dict = {}
-    # market_books = betfairutil.read_prices_file(path)
-
-    # total_vol_traded = betfairutil.get_total_volume_traded_from_prices_file(path)
-    # pre_event_vol = betfairutil.get_pre_event_volume_traded_from_prices_file(path)
-    # total_matched = []
-    # available_volume = []
-    # spread_1 = []
-    # spread_2 = []
-    # mid_price_1 = []
-    # mid_price_2 = []
-    # order_imbalance_1 = []
-    # order_imbalance_2 = []
-    # for mb in market_books:
-    #     total_matched.append(betfairutil.calculate_total_matched(mb))
-    #     available_volume.append(betfairutil.calculate_available_volume(mb, side=betfairutil.Side.BACK, max_book_percentage=3))
-
-    #     runner_1 = mb['marketDefinition']['runners'][0]['name']
-    #     runner_2 = mb['marketDefinition']['runners'][1]['name']
-    #     runner_book_1 = betfairutil.get_runner_book_from_market_book(mb,
-    #                                                             runner_name=runner_1)
-    #     runner_book_2 = betfairutil.get_runner_book_from_market_book(mb,
-    #                                                             runner_name=runner_2)
-    #     spread_1.append(betfairutil.get_spread(runner_book_1))
-    #     spread_1.append(betfairutil.get_spread(runner_book_2))
-    #     mid_price_1.append(betfairutil.get_mid_price(runner_book_1))
-    #     mid_price_2.append(betfairutil.get_mid_price(runner_book_2))
-    #     order_imbalance_1.append(betfairutil.calculate_order_book_imbalance(runner_book_1))
-    #     order_imbalance_2.append(betfairutil.calculate_order_book_imbalance(runner_book_2))
-
-    # total_matched = data_reading.apply_function_for_mb_on_entire_price_file(price_file_path=path,
-    #                                                                         function_for_mb=betfairutil.calculate_total_matched)
-
-    # total_matched = data_reading.apply_function_for_mb_on_entire_price_file(price_file_path=path,
-    #                                                                         function_for_mb=betfairutil.calculate_total_matched)
 
 
+    #### STATS AND PLOTTING
     paths = [
         "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
     ]
-
-
-
-
-    dict_stats = {}
+    dict_features = {}
 
     for price_file in paths:
         file_name = price_file.split("/")[-1].split(".bz2")[0]
-        dict_stats[file_name], inplay_idx = data_analysis.extract_stats_from_price_file(price_file=price_file)
+        dict_features[file_name], inplay_idx = data_analysis.extract_features_from_price_file(price_file=price_file)
 
-    data_plotting.plot_dict_stats_from_price_file(dict_stats=dict_stats,
-                                                  inplay_idx=inplay_idx,
-                                                  plot_path="./plots")
+    # data_plotting.plot_dict_stats_from_price_file(dict_stats=dict_stats,
+    #                                               inplay_idx=inplay_idx,
+    #                                               plot_path="./plots")
 
-    #print(dict_stats['nadal_deminaur']['Mid price'])
+        # data_analysis.calculate_stats_of_features(dict_features=dict_features[file_name])
 
-
-
-
-
+        df_features = pd.DataFrame.from_dict(dict_features[file_name])
+        data_analysis.profiling_df_features(df_features=df_features)
 
 
-    #dict['total_matched'] = total_matched
-    # dict['pre_event_volume'] = pre_event_vol
-    # dict['available_volume'] = available_volume
-    # dict['spread_1'] = spread_1
-    # dict['spread_2'] = spread_2
-    # dict['mid_price_1'] = mid_price_1
-    # dict['mid_price_2'] = mid_price_2
-    # dict['order_imbalance_1'] = order_imbalance_1
-    # dict['order_imbalance_2'] = order_imbalance_2
 
-    # for key, value in dict.items():
-    #     plt.plot(value)
-    #     plt.title(key)
-    #     plt.savefig(key)
-    #     plt.close()
+
+
+
 
     # with open('test.pkl', 'wb') as f:  # open a text file
     #      pickle.dump(dict, f) # serialize the list
-
 
     # with open('test.pkl', 'rb') as f:
     #     a = pickle.load(f) # deserialize using load()
     #     #print(a) # print student names
 
-
-
     #print("--- %s seconds ---" % (time.time() - start_time))
-
-
-
 
     # for item in alive_it(range(100)):   # <<-- wrapped items
     #     #print(item)

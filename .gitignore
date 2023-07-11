@@ -7,3 +7,4 @@ market_book
 *.pkl
 *__pycache__*
 *betfairutil_copy.py
+*.html
