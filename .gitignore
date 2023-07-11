@@ -1,3 +1,9 @@
-plot*
+plots/*
 notebooks/*
 *.ipynb
+market_book
+*.png
+*.jpg
+*.pkl
+*__pycache__*
+*betfairutil_copy.py
