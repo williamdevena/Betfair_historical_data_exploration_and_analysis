@@ -20,6 +20,20 @@ def get_last_pre_event_market_book_id_from_prices_file(
             pre_event_market_book = market_book
 
 
+
+def get_last_traded_prices_from_runner(runner_book):
+    #return runner_book['lastPriceTraded']
+    last_price = runner_book.get('lastPriceTraded', 0)
+
+    if last_price!=None:
+        return last_price
+    else:
+        return 0
+
+
+
+
+
 if __name__=="__main__":
     path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
 

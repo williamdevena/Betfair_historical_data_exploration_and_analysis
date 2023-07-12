@@ -1,7 +1,7 @@
 plots/*
 notebooks/*
 *.ipynb
-market_book
+market_book_example*
 *.png
 *.jpg
 *.pkl

@@ -22,17 +22,9 @@ def apply_function_for_mb_on_entire_price_file(price_file_path, function_for_mb,
 
     Returns:
         list: Returns a list of the results of applying function_for_mb to each MarketBook object in the price file.
-
-    Example:
-
-        apply_function_for_mb_on_entire_price_file('path/to/your/file.bz2', betfairutil.calculate_total_matched))
-
-    Note:
-        This function depends on the 'betfairutil' module, and specifically its 'read_prices_file' function.
     """
     market_books = betfairutil.read_prices_file(price_file_path)
 
-    #return list(map(function_for_mb, market_books))
     return [function_for_mb(mb, *parameters) for mb in market_books]
 
 
@@ -51,26 +43,10 @@ def apply_function_for_runner_on_entire_price_file(price_file_path, function_for
     Returns:
         list: Returns a list of the results of applying function_for_runner to each RunnerBook object in each MarketBook
         in  the given price file.
-
-    Example:
-
-        apply_function_for_runner_on_entire_mb('path/to/your/file.bz2', betfairutil.get_spread))
-
-    Note:
-        This function depends on the 'betfairutil' module, and specifically its 'read_prices_file'
-        and 'get_runner_book_from_market_book' functions.
     """
     market_books = betfairutil.read_prices_file(price_file_path)
 
     runners = [runner['name'] for runner in market_books[0]['marketDefinition']['runners']]
-
-    # result = []
-    # for runner in runners:
-    #     runner_result = []
-    #     for mb in market_books:
-    #         runner_book = betfairutil.get_runner_book_from_market_book(mb, runner_name=runner)
-    #         runner_result.append(function_for_runner(runner_book, *parameters))
-    #     result.append(runner_result)
 
     result = [
         [
@@ -82,8 +58,6 @@ def apply_function_for_runner_on_entire_price_file(price_file_path, function_for
     ]
 
     return result
-    # return [function_for_runner(rb, *parameters) for rb in runners_books]
-    #return list(map(function_for_runner, runners_books))
 
 
 

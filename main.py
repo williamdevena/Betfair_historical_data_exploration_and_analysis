@@ -141,23 +141,35 @@ def main():
 
 
     #### STATS AND PLOTTING
-    paths = [
-        "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
-    ]
-    dict_features = {}
+    # paths = [
+    #     "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
+    # ]
+    # dict_features = {}
 
-    for price_file in paths:
-        file_name = price_file.split("/")[-1].split(".bz2")[0]
-        dict_features[file_name], inplay_idx = data_analysis.extract_features_from_price_file(price_file=price_file)
+    # for price_file in paths:
+    #     file_name = price_file.split("/")[-1].split(".bz2")[0]
+    #     dict_features[file_name], inplay_idx = data_analysis.extract_features_from_price_file(price_file=price_file)
 
-    # data_plotting.plot_dict_stats_from_price_file(dict_stats=dict_stats,
-    #                                               inplay_idx=inplay_idx,
-    #                                               plot_path="./plots")
+    # # data_plotting.plot_dict_stats_from_price_file(dict_stats=dict_stats,
+    # #                                               inplay_idx=inplay_idx,
+    # #                                               plot_path="./plots")
 
-        # data_analysis.calculate_stats_of_features(dict_features=dict_features[file_name])
+    #     # data_analysis.calculate_stats_of_features(dict_features=dict_features[file_name])
 
-        df_features = pd.DataFrame.from_dict(dict_features[file_name])
-        data_analysis.profiling_df_features(df_features=df_features)
+    #     df_features = pd.DataFrame.from_dict(dict_features[file_name])
+    #     data_analysis.profiling_df_features(df_features=df_features)
+
+
+    path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
+
+    df_aggregate_stats, df_missing_data = data_analysis.analyse_price_file(price_file_path=path,
+                                     plot_path="./plots",
+                                     profiling_path="")
+
+    ## HANDLING MISSING DATA
+    # handle_missing_data()
+
+    print(df_aggregate_stats, df_missing_data)
 
 
 

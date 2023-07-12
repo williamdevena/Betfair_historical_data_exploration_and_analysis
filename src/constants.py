@@ -1,5 +1,7 @@
 import betfairutil
 
+from src import utils
+
 FUNS_FOR_PRICE_FILE = {
     'Total volume traded': betfairutil.get_total_volume_traded_from_prices_file,
     'Pre-event volume': betfairutil.get_pre_event_volume_traded_from_prices_file
@@ -14,7 +16,8 @@ FUNS_FOR_MB = {
 FUNS_FOR_RUNNERS = {
     'Spread': betfairutil.get_spread,
     'Mid price': betfairutil.get_mid_price,
-    'OB imbalance': betfairutil.calculate_order_book_imbalance
+    'OB imbalance': betfairutil.calculate_order_book_imbalance,
+    'Last traded price': utils.get_last_traded_prices_from_runner
 }
 
 PARAMETERS_FOR_FUNCTIONS = {
