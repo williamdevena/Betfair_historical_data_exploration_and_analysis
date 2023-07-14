@@ -9,39 +9,40 @@ import pandas as pd
 from src import constants, data_plotting, data_processing, utils
 
 
-def analyse_and_plot_price_files(data_path, plot_dir, save_result_in_pickle):
+def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
     """
-    This function analyses and plots data from multiple price files, provided by a path to a directory
-    containing price files. The plots are saved to specified directories (param 'plot_dir'). The function
-    returns two dictionaries ('dict_aggregate_stats' and 'dict_missing_data') containing aggregate statistics
-    and missing data for each file. The keys are the files' names and the values are DataFrames containg the
-    aggregate stats and the info on missing data.
-    Additionally, if param 'save_result_in_pickle' is True it saves the two dictionaries in separate pickle files.
+    This function traverses through a given directory, analyses and generates plots for every price file found,
+    and saves the result in pickle files. It calculates aggregate statistics, identifies missing data,
+    and computes total volume and pre-event volume traded.
 
     Args:
-        list_price_files (list): A list of paths (str) for the price files to be analysed.
-        plot_dir (str): The directory where the plots will be saved.
+        data_path (str): The path for the directory containing price files to be analysed.
+        results_dir (str): The path where the plots and some textual results (name, id,
+        total volume traded and pre event volume traded) will be saved.
+        save_result_in_pickle (bool): If True, the function saves the results in pickle files.
 
     Returns:
-        dict: A dictionary where keys are file names and values are DataFrames containing
-        aggregate statistics for each price file.
-        dict: A dictionary where keys are file names and values are DataFrames containing
-        info on missing data for each price file.
+        dict: A dictionary containing aggregate statistics, missing data, total volume traded, and pre-event volume
+              traded for each price file.
 
     Example:
 
-        files = ['path/to/your/price_file1.bz2', 'path/to/your/price_file2.bz2']
+        data_path = 'path/to/your/data/directory'
         directory = 'path/to/save/your/plots'
-        stats, missing_data = analyse_and_plot_price_files(files, directory, save_result_in_pickle=True)
-
+        save_pickle = True
+        results = analyse_and_plot_price_files(data_path, directory, save_pickle)
     """
+    plot_dir = os.path.join(results_dir, "plots")
+
     if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)
 
     dict_aggregate_stats = {}
     dict_missing_data = {}
+    dict_tot_volume_traded = {}
+    dict_pre_event_vol_traded = {}
 
-    for root, dirs, files in os.walk(data_path):
+    for root, _, files in os.walk(data_path):
         for file_name in files:
             if ".bz2" in file_name:
                 plot_dir_name = file_name.split(".bz2")[0]
@@ -52,42 +53,60 @@ def analyse_and_plot_price_files(data_path, plot_dir, save_result_in_pickle):
                 if not os.path.exists(plot_path):
                     os.makedirs(plot_path)
 
-                dict_aggregate_stats[file_name], dict_missing_data[file_name] = analyse_and_plotting_price_file(price_file_path=file_path,
-                                            plot_path=plot_path)
+                dict_result = analyse_and_plotting_price_file(price_file_path=file_path,
+                                        results_dir=results_dir)
+
+                dict_aggregate_stats[file_name] = dict_result['aggr_stats']
+                dict_missing_data[file_name] = dict_result['missing_data']
+                dict_tot_volume_traded[file_name] = dict_result['tot_vol_traded']
+                dict_pre_event_vol_traded[file_name] = dict_result['pre_event_vol_traded']
 
     if save_result_in_pickle:
-        with open('aggregate_stats_dict.pkl', 'wb') as f:
+        with open(os.path.join(results_dir,'aggregate_stats_dict.pkl'), 'wb') as f:
             pickle.dump(dict_aggregate_stats, f)
 
-        with open('missing_data_dict.pkl', 'wb') as f:
+        with open(os.path.join(results_dir,'missing_data_dict.pkl'), 'wb') as f:
             pickle.dump(dict_missing_data, f)
 
-    return dict_aggregate_stats, dict_missing_data
+        with open(os.path.join(results_dir,'tot_volume_traded_dict.pkl'), 'wb') as f:
+            pickle.dump(dict_tot_volume_traded, f)
+
+        with open(os.path.join(results_dir,'pre_event_volume_traded.pkl'), 'wb') as f:
+            pickle.dump(dict_pre_event_vol_traded, f)
+
+    return {'aggr_stats': dict_aggregate_stats,
+            'missing_data': dict_missing_data,
+            'tot_vol_traded': dict_tot_volume_traded,
+            'pre_event_vol_traded': dict_pre_event_vol_traded}
 
 
 
 
-def analyse_and_plotting_price_file(price_file_path, plot_path):
+def analyse_and_plotting_price_file(price_file_path, results_dir):
     """
-    This function analyses and generates plots for data from a given price file. It also calculates aggregate
-    statistics and identifies missing data. The plots are saved to the specified directory.
-    This function is called by the 'analyse_and_plot_price_files' function for each price file.
+    This function analyses a given price file, generates several plots based on its features, calculates aggregate
+    statistics, identifies missing data, and returns these results in a dictionary format.
 
     Args:
         price_file_path (str): The path for the price file to be analysed.
-        plot_path (str): The path where the plots will be saved.
+        results_dir (str): The path where the plots  and some textaul results will be saved.
 
     Returns:
-        pandas.DataFrame: A DataFrame containing the aggregate statistics for the file.
-        pandas.DataFrame: A DataFrame containing the missing data information for the file.
+        dict: A dictionary containing aggregate statistics, missing data, total volume traded, and pre-event volume
+              traded for the price file.
 
     Example:
 
-        file = 'path/to/your/price_file'
-        directory = 'path/to/save/your/plots'
-        stats, missing_data = analyse_and_plotting_price_file(file, directory)
+        price_file_path = 'path/to/your/price_file.bz2'
+        plot_path = 'path/to/save/your/plot'
+        results = analyse_and_plotting_price_file(price_file_path, plot_path)
+
     """
+    plot_dir = os.path.join(results_dir, "plots")
     file_name = price_file_path.split("/")[-1].split(".bz2")[0]
+    plot_dir_name = file_name.split(".bz2")[0]
+    plot_path = os.path.join(plot_dir, plot_dir_name)
+
     dict_features, inplay_idx = extract_features_from_price_file(price_file=price_file_path)
 
     dict_features_only_lists = {feature_name: feature for feature_name, feature in dict_features.items()
@@ -111,11 +130,19 @@ def analyse_and_plotting_price_file(price_file_path, plot_path):
     ## MISSING DATA
     df_missing_data = calculate_missing_data(df_features=df_features)
 
-    print(f"Total volume traded: {dict_features['Total volume traded']}")
-    print(f"Pre-event volume: {dict_features['Pre-event volume']}")
-    print()
+    # WRITE TOT. VOLUME AND PRE-EVENT VOLUME
+    with open(os.path.join(results_dir,'results.txt'), 'a') as f:
+        for name, _ in constants.FUNS_FOR_PRICE_FILE.items():
+            f.write(f"{name}: {dict_features[name]}\n")
+            # f.write(f"Event ID: {dict_features['EventId']}\n")
+            # f.write(f"Tot volume traded: {dict_features['Total volume traded']}\n")
+            # f.write(f"Pre event volume traded: {dict_features['Pre-event volume']}\n\n")
+        f.write("\n")
 
-    return df_aggregate_stats, df_missing_data
+    return {'aggr_stats': df_aggregate_stats,
+            'missing_data': df_missing_data,
+            'tot_vol_traded': dict_features['Total volume traded'],
+            'pre_event_vol_traded': dict_features['Pre-event volume']}
 
 
 
@@ -164,6 +191,9 @@ def extract_features_from_price_file(price_file):
     dict_features['Matched'] = list(np.diff(dict_features['Total matched'], prepend=0))
     dict_features['Diff time'] = calculate_avg_time_between_market_books(dict_features['Publish time'])
 
+    print(f"Event name: {dict_features['Name']}")
+    print(f"Total volume traded: {dict_features['Total volume traded']}")
+    print(f"Pre-event volume: {dict_features['Pre-event volume']}")
     if inplay_idx!=None:
         dict_features['Pre-event diff time'] = dict_features['Diff time'][:inplay_idx]
         dict_features['In-play diff time'] = dict_features['Diff time'][inplay_idx:]
@@ -171,6 +201,7 @@ def extract_features_from_price_file(price_file):
         dict_features['In-play avg diff time'] = np.average(dict_features['In-play diff time'])
         print(f"Pre-event avg diff time: {dict_features['Pre-event avg diff time']}")
         print(f"In-play avg diff time: {dict_features['In-play avg diff time']}")
+    print()
 
 
     return dict_features, inplay_idx

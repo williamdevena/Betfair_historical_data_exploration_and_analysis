@@ -164,8 +164,7 @@ def main():
 
 
     data_path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/match_odds/1"
-    plot_dir = "./plots"
-    #price
+    results_dir = "./results"
 
 
     # paths = [
@@ -183,9 +182,9 @@ def main():
     #             print(file)
     #     print("-----")
 
-    # data_analysis.analyse_and_plot_price_files(data_path=data_path,
-    #                                            plot_dir=plot_dir,
-    #                                            save_result_in_pickle=True)
+    data_analysis.analyse_and_plot_price_files(data_path=data_path,
+                                               results_dir=results_dir,
+                                               save_result_in_pickle=True)
 
 
 
@@ -197,7 +196,9 @@ def main():
     # ## HANDLING MISSING DATA
     # # handle_missing_data()
 
-    # print(df_aggregate_stats, df_missing_data)
+
+
+
 
     # with open('betfairutil_funs.txt', 'w') as f:
     #     for fun in dir(betfairutil_copy):
@@ -214,12 +215,12 @@ def main():
     # with open('test.pkl', 'wb') as f:  # open a text file
     #      pickle.dump(dict, f) # serialize the list
 
-    with open('aggregate_stats_dict.pkl', 'rb') as f:
-        aggregate_stats_dict = pickle.load(f) # deserialize using load()
-        #print(a) # print student names
+    # with open('aggregate_stats_dict.pkl', 'rb') as f:
+    #     aggregate_stats_dict = pickle.load(f) # deserialize using load()
+    #     #print(a) # print student names
 
-    # pprint(aggregate_stats_dict.keys())
-    print(aggregate_stats_dict['1.208158381.bz2'])
+    # # pprint(aggregate_stats_dict.keys())
+    # print(aggregate_stats_dict['1.208158381.bz2'])
 
     #print("--- %s seconds ---" % (time.time() - start_time))
 

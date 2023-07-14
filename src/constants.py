@@ -4,7 +4,10 @@ from src import betfairutil_copy, utils
 
 FUNS_FOR_PRICE_FILE = {
     'Total volume traded': betfairutil.get_total_volume_traded_from_prices_file,
-    'Pre-event volume': betfairutil.get_pre_event_volume_traded_from_prices_file
+    'Pre-event volume': betfairutil.get_pre_event_volume_traded_from_prices_file,
+    'Name': utils.get_name_match,
+    'Event Id': utils.get_event_id,
+    'Date': utils.get_event_date
 }
 
 FUNS_FOR_MB = {

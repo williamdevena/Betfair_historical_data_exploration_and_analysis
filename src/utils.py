@@ -35,6 +35,26 @@ def get_last_traded_prices_from_runner(runner_book):
 
 
 
+def get_name_match(price_file):
+    market_books = betfairutil.read_prices_file(price_file)
+
+    return market_books[0]['marketDefinition']['eventName']
+
+
+def get_event_id(price_file):
+    market_books = betfairutil.read_prices_file(price_file)
+
+    return market_books[0]['marketDefinition']['eventId']
+
+
+def get_event_date(price_file):
+    market_books = betfairutil.read_prices_file(price_file)
+
+    return market_books[0]['marketDefinition']['openDate']
+
+
+
+
 
 
 
