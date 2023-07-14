@@ -1,55 +1,122 @@
+#from ydata_profiling import ProfileReport
+import os
+import pickle
 from pprint import pprint
 
 import numpy as np
 import pandas as pd
-from ydata_profiling import ProfileReport
 
 from src import constants, data_plotting, data_processing, utils
 
 
-def analyse_price_file(price_file_path, plot_path, profiling_path):
+def analyse_and_plot_price_files(data_path, plot_dir, save_result_in_pickle):
+    """
+    This function analyses and plots data from multiple price files, provided by a path to a directory
+    containing price files. The plots are saved to specified directories (param 'plot_dir'). The function
+    returns two dictionaries ('dict_aggregate_stats' and 'dict_missing_data') containing aggregate statistics
+    and missing data for each file. The keys are the files' names and the values are DataFrames containg the
+    aggregate stats and the info on missing data.
+    Additionally, if param 'save_result_in_pickle' is True it saves the two dictionaries in separate pickle files.
+
+    Args:
+        list_price_files (list): A list of paths (str) for the price files to be analysed.
+        plot_dir (str): The directory where the plots will be saved.
+
+    Returns:
+        dict: A dictionary where keys are file names and values are DataFrames containing
+        aggregate statistics for each price file.
+        dict: A dictionary where keys are file names and values are DataFrames containing
+        info on missing data for each price file.
+
+    Example:
+
+        files = ['path/to/your/price_file1.bz2', 'path/to/your/price_file2.bz2']
+        directory = 'path/to/save/your/plots'
+        stats, missing_data = analyse_and_plot_price_files(files, directory, save_result_in_pickle=True)
+
+    """
+    if not os.path.exists(plot_dir):
+            os.makedirs(plot_dir)
+
+    dict_aggregate_stats = {}
+    dict_missing_data = {}
+
+    for root, dirs, files in os.walk(data_path):
+        for file_name in files:
+            if ".bz2" in file_name:
+                plot_dir_name = file_name.split(".bz2")[0]
+                file_path = os.path.join(root, file_name)
+                plot_path = os.path.join(plot_dir, plot_dir_name)
+                print(file_path)
+
+                if not os.path.exists(plot_path):
+                    os.makedirs(plot_path)
+
+                dict_aggregate_stats[file_name], dict_missing_data[file_name] = analyse_and_plotting_price_file(price_file_path=file_path,
+                                            plot_path=plot_path)
+
+    if save_result_in_pickle:
+        with open('aggregate_stats_dict.pkl', 'wb') as f:
+            pickle.dump(dict_aggregate_stats, f)
+
+        with open('missing_data_dict.pkl', 'wb') as f:
+            pickle.dump(dict_missing_data, f)
+
+    return dict_aggregate_stats, dict_missing_data
+
+
+
+
+def analyse_and_plotting_price_file(price_file_path, plot_path):
+    """
+    This function analyses and generates plots for data from a given price file. It also calculates aggregate
+    statistics and identifies missing data. The plots are saved to the specified directory.
+    This function is called by the 'analyse_and_plot_price_files' function for each price file.
+
+    Args:
+        price_file_path (str): The path for the price file to be analysed.
+        plot_path (str): The path where the plots will be saved.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the aggregate statistics for the file.
+        pandas.DataFrame: A DataFrame containing the missing data information for the file.
+
+    Example:
+
+        file = 'path/to/your/price_file'
+        directory = 'path/to/save/your/plots'
+        stats, missing_data = analyse_and_plotting_price_file(file, directory)
+    """
     file_name = price_file_path.split("/")[-1].split(".bz2")[0]
     dict_features, inplay_idx = extract_features_from_price_file(price_file=price_file_path)
 
     dict_features_only_lists = {feature_name: feature for feature_name, feature in dict_features.items()
                                if isinstance(feature, list)}
 
-    df_features = pd.DataFrame.from_dict(dict_features_only_lists)
+    df_features = pd.DataFrame.from_dict({k: v for k, v in dict_features_only_lists.items()
+                                          if k!='Pre-event diff time' and
+                                          k!='In-play diff time'})
 
     ## PLOTS
-    print("plotting")
-    data_plotting.plot_df_features_from_price_file(df_features=df_features,
+    data_plotting.plot_dict_features_from_price_file(dict_features=dict_features_only_lists,
                                                    inplay_idx=inplay_idx,
                                                    plot_path=plot_path)
 
-    print("corr matrix")
     data_plotting.plot_correlation_matrix(df_features=df_features,
                                           plot_path=plot_path)
 
     ## AGGREGATE STATS
-    print("aggr")
     df_aggregate_stats = df_features.describe()
 
     ## MISSING DATA
-    print("missing")
     df_missing_data = calculate_missing_data(df_features=df_features)
 
-    ## OUTLIERS
-
-
-    ## PROFILING (OPTIONAL)
-    # profiling_df_features(df_features=df_features,
-    #                       path_file=profiling_path)
+    print(f"Total volume traded: {dict_features['Total volume traded']}")
+    print(f"Pre-event volume: {dict_features['Pre-event volume']}")
+    print()
 
     return df_aggregate_stats, df_missing_data
 
-
-
-
-
-def profiling_df_features(df_features, path_file):
-    profile = ProfileReport(df_features, title="Profiling features")
-    profile.to_file(path_file)
 
 
 def extract_features_from_price_file(price_file):
@@ -73,7 +140,7 @@ def extract_features_from_price_file(price_file):
 
     """
     dict_features = {}
-    _, inplay_idx = utils.get_last_pre_event_market_book_id_from_prices_file(price_file)
+    inplay_idx = utils.get_last_pre_event_market_book_id_from_prices_file(price_file)
 
     for name, function in constants.FUNS_FOR_PRICE_FILE.items():
         dict_features[name] = function(price_file)
@@ -95,10 +162,48 @@ def extract_features_from_price_file(price_file):
             dict_features[name+f"_{idx+1}"] = result
 
     dict_features['Matched'] = list(np.diff(dict_features['Total matched'], prepend=0))
+    dict_features['Diff time'] = calculate_avg_time_between_market_books(dict_features['Publish time'])
 
-    print(dict_features['Mid price_1'])
+    if inplay_idx!=None:
+        dict_features['Pre-event diff time'] = dict_features['Diff time'][:inplay_idx]
+        dict_features['In-play diff time'] = dict_features['Diff time'][inplay_idx:]
+        dict_features['Pre-event avg diff time'] = np.average(dict_features['Pre-event diff time'])
+        dict_features['In-play avg diff time'] = np.average(dict_features['In-play diff time'])
+        print(f"Pre-event avg diff time: {dict_features['Pre-event avg diff time']}")
+        print(f"In-play avg diff time: {dict_features['In-play avg diff time']}")
+
 
     return dict_features, inplay_idx
+
+
+def calculate_avg_time_between_market_books(list_timestamps):
+    """
+    This function calculates the average time in seconds between subsequent market books,
+    represented by timestamps.
+
+    Args:
+        list_timestamps (list): A list of datetime objects representing the timestamps of the market books.
+
+    Returns:
+        list: A list of the time differences (in seconds) between subsequent market books. The last element is always 0
+              as it's the difference with itself.
+
+    Example:
+
+        timestamps = [datetime(2020, 1, 1, 10, 0), datetime(2020, 1, 1, 11, 0), datetime(2020, 1, 1, 12, 0)]
+        diffs_seconds = calculate_avg_time_between_market_books(timestamps)
+        # diffs_seconds would be [3600.0, 3600.0, 0]
+    """
+    diffs = [(list_timestamps[i+1]-list_timestamps[i])
+            for i in range(len(list_timestamps)-1)]
+
+    diffs_seconds = [diff.total_seconds() for diff in diffs]
+    diffs_seconds.append(0)
+
+    return diffs_seconds
+
+
+
 
 
 def calculate_missing_data(df_features):
@@ -133,51 +238,6 @@ def calculate_missing_data(df_features):
 
     return df_missing_data
 
-
-
-
-
-# def calculate_aggregate_stats_of_features(df_features):
-#     """
-#     This function calculates aggregate statistics of features calculated from a price file,
-#     like 'available volume', 'mid price', ...
-
-#     The function only accepts a DataFrame with columns of the same length (this means
-#     that single value features like 'Total volume traded' can't be in the DataFrame).
-
-#     Args:
-#         dict_features (dict): A dictionary where the keys are feature names (str) and the values are lists of feature
-#         values.
-
-#     Returns:
-#         pandas.DataFrame: A DataFrame of the calculated aggregate statistics for each feature. The aggregate statistics
-#         include: count, mean, std, min, 25%, 50%, 75%, max.
-
-#     Example:
-
-#         features = {'Feature1': [1, 2, 3, 4, 5], 'Feature2': [6, 7, 8, 9, 10]}
-#         stats = calculate_stats_of_features(features)
-#         print(stats)
-#         # Output:
-#         #        Feature1  Feature2
-#         # count  5.000000  5.000000
-#         # mean   3.000000  8.000000
-#         # std    1.581139  1.581139
-#         # min    1.000000  6.000000
-#         # 25%    2.000000  7.000000
-#         # 50%    3.000000  8.000000
-#         # 75%    4.000000  9.000000
-#         # max    5.000000 10.000000
-
-#     """
-#     # dict_features_only_lists = {feature_name: feature for feature_name, feature in dict_features.items()
-#     #               if isinstance(feature, list)}
-
-#     ## AGGREGATE STATS
-#     #df_features_only_lists = pd.DataFrame.from_dict(dict_features_only_lists)
-#     df_aggregate_stats = df_features.describe()
-
-#     return df_aggregate_stats
 
 
 

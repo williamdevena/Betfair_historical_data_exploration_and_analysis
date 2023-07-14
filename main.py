@@ -10,7 +10,8 @@ import numpy as np
 import pandas as pd
 from alive_progress import alive_it
 
-from src import constants, data_analysis, data_plotting, data_processing, utils
+from src import (betfairutil_copy, constants, data_analysis, data_plotting,
+                 data_processing, utils)
 
 
 def main():
@@ -160,16 +161,49 @@ def main():
     #     data_analysis.profiling_df_features(df_features=df_features)
 
 
-    path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
 
-    df_aggregate_stats, df_missing_data = data_analysis.analyse_price_file(price_file_path=path,
-                                     plot_path="./plots",
-                                     profiling_path="")
 
-    ## HANDLING MISSING DATA
-    # handle_missing_data()
+    data_path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/match_odds/1"
+    plot_dir = "./plots"
+    #price
 
-    print(df_aggregate_stats, df_missing_data)
+
+    # paths = [
+    #     "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/matches/nadal_deminaur.bz2"
+    # ]
+
+    # for price_file in [file for file in os.listdir(data_path)
+    #                    if ".bz2" in file]:
+    #     print(price_file)
+
+    # for root, dirs, files in os.walk(data_path):
+    #     print(root)
+    #     for file in files:
+    #         if ".bz2" in file:
+    #             print(file)
+    #     print("-----")
+
+    # data_analysis.analyse_and_plot_price_files(data_path=data_path,
+    #                                            plot_dir=plot_dir,
+    #                                            save_result_in_pickle=True)
+
+
+
+
+
+
+
+
+    # ## HANDLING MISSING DATA
+    # # handle_missing_data()
+
+    # print(df_aggregate_stats, df_missing_data)
+
+    # with open('betfairutil_funs.txt', 'w') as f:
+    #     for fun in dir(betfairutil_copy):
+    #         f.write(fun+"\n")
+
+
 
 
 
@@ -180,9 +214,12 @@ def main():
     # with open('test.pkl', 'wb') as f:  # open a text file
     #      pickle.dump(dict, f) # serialize the list
 
-    # with open('test.pkl', 'rb') as f:
-    #     a = pickle.load(f) # deserialize using load()
-    #     #print(a) # print student names
+    with open('aggregate_stats_dict.pkl', 'rb') as f:
+        aggregate_stats_dict = pickle.load(f) # deserialize using load()
+        #print(a) # print student names
+
+    # pprint(aggregate_stats_dict.keys())
+    print(aggregate_stats_dict['1.208158381.bz2'])
 
     #print("--- %s seconds ---" % (time.time() - start_time))
 

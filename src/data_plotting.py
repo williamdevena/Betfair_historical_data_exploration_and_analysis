@@ -1,12 +1,15 @@
 import logging
 import os
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
-def plot_df_features_from_price_file(df_features, inplay_idx, plot_path):
+
+def plot_dict_features_from_price_file(dict_features, inplay_idx, plot_path):
     """
     This code block is used to generate a set of line plots and distribution plots for each feature in a given DataFrame.
     Each feature is both plotted as a time series and as a distribution. The point at which in-play begins is indicated with
@@ -19,22 +22,33 @@ def plot_df_features_from_price_file(df_features, inplay_idx, plot_path):
 
     """
     plt.rcParams["figure.figsize"] = (10,5)
-    for feature_name, feature in df_features.items():
+    for feature_name, feature in dict_features.items():
         ## LINE PLOT
-        print(feature_name)
-        plt.plot(feature, label=feature_name)
-        plt.axvline(x = inplay_idx, color = 'r', label = 'in-play')
+        # print(feature_name)
+        if feature_name=="Publish time":
+            plt.plot(feature, range(len(feature)), label=feature_name)
+            if inplay_idx!=None:
+                plt.axhline(y = inplay_idx, color = 'r', label = 'in-play')
+        else:
+            plt.plot(feature, label=feature_name)
+
+            if feature_name!="In-play diff time":
+                if inplay_idx!=None:
+                    plt.axvline(x = inplay_idx, color = 'r', label = 'in-play')
 
         if "Mid price" in feature_name:
             plt.ylim(0, 15)
         if "Matched" in feature_name:
             plt.ylim(0, 20000)
-
         if "Last traded price" in feature_name:
             plt.ylim(0, 20)
 
         plt.legend()
-        plt.title(feature_name)
+        if "time" in feature_name and (feature_name!="Publish time"):
+            plt.title(f"{feature_name} (seconds)")
+        else:
+            plt.title(feature_name)
+
         plt.savefig(os.path.join(plot_path, feature_name))
         plt.close()
 
@@ -63,6 +77,7 @@ def plot_correlation_matrix(df_features, plot_path):
         f, ax = plt.subplots(figsize=(12, 9))
         sns.heatmap(correlation_matrix, square=False, annot=True, mask=mask)
         plt.savefig(os.path.join(plot_path, f"corr_matrix_{method}"))
+        plt.close()
 
 
 

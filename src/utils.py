@@ -12,12 +12,15 @@ def get_last_pre_event_market_book_id_from_prices_file(
     :return: The last pre-event market book, where the status is not SUSPENDED if filter_suspended has been set to True, provided one such market book exists in the prices file. If not then None will be returned
     """
     g = betfairutil.create_market_book_generator_from_prices_file(path_to_prices_file)
-    pre_event_market_book = None
+    # pre_event_market_book = None
+    #len(g)
     for idx, market_book in enumerate(g):
+        #print(idx)
         if market_book["inplay"]:
-            return pre_event_market_book, idx
-        if not filter_suspended or market_book["status"] != "SUSPENDED":
-            pre_event_market_book = market_book
+            #print("trovato inplay")
+            return idx
+        # if not filter_suspended or market_book["status"] != "SUSPENDED":
+        #     pre_event_market_book = market_book
 
 
 
@@ -29,6 +32,9 @@ def get_last_traded_prices_from_runner(runner_book):
         return last_price
     else:
         return 0
+
+
+
 
 
 

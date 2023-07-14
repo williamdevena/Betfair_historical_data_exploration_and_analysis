@@ -1,4 +1,4 @@
-plots/*
+plots*
 notebooks/*
 *.ipynb
 market_book_example*
@@ -8,3 +8,4 @@ market_book_example*
 *__pycache__*
 *betfairutil_copy.py
 *.html
+betfairutil_funs*

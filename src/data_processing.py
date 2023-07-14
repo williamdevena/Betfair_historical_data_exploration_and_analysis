@@ -7,7 +7,7 @@ from typing import Dict, List
 import betfairutil
 import pandas as pd
 
-from src import constants, data_writing, runner_order_book
+from src import betfairutil_copy, constants, data_writing, runner_order_book
 
 
 def apply_function_for_mb_on_entire_price_file(price_file_path, function_for_mb, parameters=[]):
@@ -48,9 +48,19 @@ def apply_function_for_runner_on_entire_price_file(price_file_path, function_for
 
     runners = [runner['name'] for runner in market_books[0]['marketDefinition']['runners']]
 
+    # for runner in runners:
+    #     # print("1")
+    #     # print(runner)
+    #     for mb in market_books:
+    #         print("2")
+    #         #print(mb)
+    #         print(betfairutil_copy.get_runner_book_from_market_book(mb, runner_name=runner))
+    #         print(function_for_runner(betfairutil.get_runner_book_from_market_book(mb, runner_name=runner),
+    #                             *parameters))
+
     result = [
         [
-            function_for_runner(betfairutil.get_runner_book_from_market_book(mb, runner_name=runner),
+            function_for_runner(betfairutil_copy.get_runner_book_from_market_book(mb, runner_name=runner),
                                 *parameters)
             for mb in market_books
         ]
