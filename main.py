@@ -11,6 +11,7 @@ import pandas as pd
 import seaborn as sns
 from alive_progress import alive_it
 
+import data_exploration
 from src import (betfairutil_copy, constants, data_analysis, data_plotting,
                  data_processing)
 from utils import pricefileutils, utils
@@ -30,9 +31,9 @@ def main():
 
 
     ## PRINT BET NAMES IN SINGLE EVENT FOLDER
-    event_path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/djokovic/29/32060431"
-    event_names_dict = utils.get_bet_names_from_event_folder(event_path=event_path)
-    pprint(event_names_dict)
+    # event_path = "/Users/william.devena/Desktop/UCL/RESEARCH_PROJECT/QST/Data/djokovic/29/32060431"
+    # event_names_dict = utils.get_bet_names_from_event_folder(event_path=event_path)
+    # pprint(event_names_dict)
 
 
 
@@ -44,6 +45,10 @@ def main():
 
     # ## HANDLING MISSING DATA
     # # handle_missing_data()
+
+
+    ## DATA EXPLORATION
+    data_exploration.data_exploration()
 
 
 
