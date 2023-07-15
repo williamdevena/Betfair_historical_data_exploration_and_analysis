@@ -5,8 +5,10 @@ from pprint import pprint
 
 import numpy as np
 import pandas as pd
+from alive_progress import alive_it
 
-from src import constants, data_plotting, data_processing, utils
+from src import constants, data_plotting, data_processing
+from utils import pricefileutils
 
 
 def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
@@ -14,11 +16,21 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
     This function traverses through a given directory, analyses and generates plots for every price file found,
     and saves the result in pickle files. It calculates aggregate statistics, identifies missing data,
     and computes total volume and pre-event volume traded.
+    The results saved are the following:
+        - plots of the extracted festures for each event are saved in a 'plots'
+          directory inside 'results_dir' directory.
+        - 4 pickle files ('aggregate_stats_dict.pkl', 'missing_data_dict.pkl',
+          'tot_volume_traded_dict.pkl', 'pre_event_volume_traded.pkl') are saved
+          in the 'results-dir' directory.
+        - 2 plots are saved in the 'results_dir' directory. One showes the distribution of the
+        feature 'total volume traded' in all the events analysed and the other one shows the
+        distribution of the 'Pre event volume traded' feature.
 
     Args:
         data_path (str): The path for the directory containing price files to be analysed.
         results_dir (str): The path where the plots and some textual results (name, id,
-        total volume traded and pre event volume traded) will be saved.
+        total volume traded and pre event volume traded) will be saved (the directory doesn't
+        have to exist already, it is created in case it doesn't).
         save_result_in_pickle (bool): If True, the function saves the results in pickle files.
 
     Returns:
@@ -27,10 +39,10 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
 
     Example:
 
-        data_path = 'path/to/your/data/directory'
-        directory = 'path/to/save/your/plots'
+        data_path = 'path/to/your/data/Jan/1'
+        results_dir = 'path/to/save/your/results_1'
         save_pickle = True
-        results = analyse_and_plot_price_files(data_path, directory, save_pickle)
+        results = analyse_and_plot_price_files(data_path, results_dir, save_pickle)
     """
     plot_dir = os.path.join(results_dir, "plots")
 
@@ -42,13 +54,13 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
     dict_tot_volume_traded = {}
     dict_pre_event_vol_traded = {}
 
-    for root, _, files in os.walk(data_path):
+    for root, _, files in alive_it(list(os.walk(data_path))):
         for file_name in files:
             if ".bz2" in file_name:
                 plot_dir_name = file_name.split(".bz2")[0]
                 file_path = os.path.join(root, file_name)
                 plot_path = os.path.join(plot_dir, plot_dir_name)
-                print(file_path)
+                #print(file_path)
 
                 if not os.path.exists(plot_path):
                     os.makedirs(plot_path)
@@ -60,6 +72,11 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
                 dict_missing_data[file_name] = dict_result['missing_data']
                 dict_tot_volume_traded[file_name] = dict_result['tot_vol_traded']
                 dict_pre_event_vol_traded[file_name] = dict_result['pre_event_vol_traded']
+
+    data_plotting.plot_distr_volume_traded(dict_volume_traded=dict_tot_volume_traded,
+                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_TOT_VOLUME))
+    data_plotting.plot_distr_volume_traded(dict_volume_traded=dict_pre_event_vol_traded,
+                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_PRE_EVENT_VOLUME))
 
     if save_result_in_pickle:
         with open(os.path.join(results_dir,'aggregate_stats_dict.pkl'), 'wb') as f:
@@ -167,7 +184,7 @@ def extract_features_from_price_file(price_file):
 
     """
     dict_features = {}
-    inplay_idx = utils.get_last_pre_event_market_book_id_from_prices_file(price_file)
+    inplay_idx = pricefileutils.get_last_pre_event_market_book_id_from_prices_file(price_file)
 
     for name, function in constants.FUNS_FOR_PRICE_FILE.items():
         dict_features[name] = function(price_file)
@@ -191,17 +208,17 @@ def extract_features_from_price_file(price_file):
     dict_features['Matched'] = list(np.diff(dict_features['Total matched'], prepend=0))
     dict_features['Diff time'] = calculate_avg_time_between_market_books(dict_features['Publish time'])
 
-    print(f"Event name: {dict_features['Name']}")
-    print(f"Total volume traded: {dict_features['Total volume traded']}")
-    print(f"Pre-event volume: {dict_features['Pre-event volume']}")
+    # print(f"Event name: {dict_features['Name']}")
+    # print(f"Total volume traded: {dict_features['Total volume traded']}")
+    # print(f"Pre-event volume: {dict_features['Pre-event volume']}")
     if inplay_idx!=None:
         dict_features['Pre-event diff time'] = dict_features['Diff time'][:inplay_idx]
         dict_features['In-play diff time'] = dict_features['Diff time'][inplay_idx:]
         dict_features['Pre-event avg diff time'] = np.average(dict_features['Pre-event diff time'])
         dict_features['In-play avg diff time'] = np.average(dict_features['In-play diff time'])
-        print(f"Pre-event avg diff time: {dict_features['Pre-event avg diff time']}")
-        print(f"In-play avg diff time: {dict_features['In-play avg diff time']}")
-    print()
+        # print(f"Pre-event avg diff time: {dict_features['Pre-event avg diff time']}")
+        # print(f"In-play avg diff time: {dict_features['In-play avg diff time']}")
+    # print()
 
 
     return dict_features, inplay_idx

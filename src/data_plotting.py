@@ -1,5 +1,6 @@
 import logging
 import os
+import pickle
 import warnings
 
 import matplotlib.pyplot as plt
@@ -80,6 +81,37 @@ def plot_correlation_matrix(df_features, plot_path):
         plt.close()
 
 
+def plot_distr_volume_traded(dict_volume_traded, path_plot):
+    list_tot_vol = [v for k, v in dict_volume_traded.items()
+                    if v!=None
+                    ]
+    sns.displot(list_tot_vol, binwidth=20000)
+    plt.savefig(os.path.join(path_plot))
+    plt.close()
+
+
+
+
+def load_tot_vol_dict_and_plot_distr(path_pickle_file, path_plot):
+    with open(os.path.join(path_pickle_file), 'rb') as f:
+        tot_volume_traded_dict = pickle.load(f)
+
+
+    #print(tot_volume_traded_dict)
+    # list_tot_vol_all = [v for k, v in tot_volume_traded_dict.items()
+    #                 if v!=None
+    #                # and v<1000000
+    #                 ]
+    list_tot_vol = [v for k, v in tot_volume_traded_dict.items()
+                    if v!=None
+                    ]
+
+    # sns.displot(list_tot_vol_all)
+    # plt.savefig(os.path.join(results_dir,'tot_vol_all'))
+    # plt.close()
+    sns.displot(list_tot_vol, binwidth=20000)
+    plt.savefig(os.path.join(path_plot))
+    plt.close()
 
 
 
