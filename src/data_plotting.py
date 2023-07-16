@@ -81,11 +81,13 @@ def plot_correlation_matrix(df_features, plot_path):
         plt.close()
 
 
-def plot_distr_volume_traded(dict_volume_traded, path_plot):
+def plot_distr_volume_traded(dict_volume_traded, path_plot, binwidth):
     list_tot_vol = [v for k, v in dict_volume_traded.items()
                     if v!=None
                     ]
-    sns.displot(list_tot_vol, binwidth=20000)
+    sns.displot(list_tot_vol,
+                #binwidth=binwidth
+                )
     plt.savefig(os.path.join(path_plot))
     plt.close()
 

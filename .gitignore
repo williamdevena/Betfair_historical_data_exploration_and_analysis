@@ -11,3 +11,5 @@ market_book_example*
 betfairutil_funs*
 results*
 main_old.py
+.env
+not_for_git*

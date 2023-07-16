@@ -74,9 +74,11 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
                 dict_pre_event_vol_traded[file_name] = dict_result['pre_event_vol_traded']
 
     data_plotting.plot_distr_volume_traded(dict_volume_traded=dict_tot_volume_traded,
-                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_TOT_VOLUME))
+                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_TOT_VOLUME),
+                                                binwidth=20000)
     data_plotting.plot_distr_volume_traded(dict_volume_traded=dict_pre_event_vol_traded,
-                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_PRE_EVENT_VOLUME))
+                                                path_plot=os.path.join(results_dir, constants.NAME_PLOT_PRE_EVENT_VOLUME),
+                                                binwidth=5000)
 
     if save_result_in_pickle:
         with open(os.path.join(results_dir,'aggregate_stats_dict.pkl'), 'wb') as f:

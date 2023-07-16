@@ -11,9 +11,8 @@ import pandas as pd
 import seaborn as sns
 from alive_progress import alive_it
 
-import data_exploration
-from src import (betfairutil_copy, constants, data_analysis, data_plotting,
-                 data_processing)
+from src import (betfairutil_copy, constants, data_analysis, data_exploration,
+                 data_plotting, data_processing)
 from utils import pricefileutils, utils
 
 
