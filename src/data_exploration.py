@@ -25,17 +25,17 @@ def data_exploration():
 
 
 
-    ## ANALYSE ENTIRE DATA FOLDER (CONTAINING MULTIPLE DAYS)
-    for day_of_the_month in range(11, 32):
-        print(day_of_the_month)
-        day_folder_path = os.path.join(data_path, str(day_of_the_month))
-        results_dir = f"./results/results_{day_of_the_month}"
+    # ## ANALYSE ENTIRE DATA FOLDER (CONTAINING MULTIPLE DAYS)
+    # for day_of_the_month in range(16, 32):
+    #     print(day_of_the_month)
+    #     day_folder_path = os.path.join(data_path, str(day_of_the_month))
+    #     results_dir = f"./results/results_{day_of_the_month}"
 
-        if os.path.exists(day_folder_path) and not os.path.exists(results_dir):
-            data_analysis.analyse_and_plot_price_files(data_path=day_folder_path,
-                                                    results_dir=results_dir,
-                                                    save_result_in_pickle=True)
-            #print(day_of_the_month)
+    #     if os.path.exists(day_folder_path) and not os.path.exists(results_dir):
+    #         data_analysis.analyse_and_plot_price_files(data_path=day_folder_path,
+    #                                                 results_dir=results_dir,
+    #                                                 save_result_in_pickle=True)
+    #         #print(day_of_the_month)
 
 
 
@@ -44,6 +44,17 @@ def data_exploration():
     #                                                                              constants.PICKLE_FILE_NAME_TOT_VOLUME),
     #                                                path_plot=os.path.join(results_dir,
     #                                                                       constants.NAME_PLOT_TOT_VOLUME))
+
+
+
+    ### LOAD AND PLOT DISTRIBUTION OF ALL VOLUME PICKLE FILES
+    data_plotting.load_and_plot_all_volume_pickle_files(
+        results_dir="./results",
+        name_pickle_file="tot_volume_traded_dict.pkl",
+        path_plot="./results",
+        limit_volume=500000
+
+    )
 
 
 

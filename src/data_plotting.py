@@ -6,6 +6,7 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from alive_progress import alive_it
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -94,7 +95,25 @@ def plot_distr_volume_traded(dict_volume_traded, path_plot, binwidth):
 
 
 
-def load_tot_vol_dict_and_plot_distr(path_pickle_file, path_plot):
+def load_dict_from_pickle_and_plot_distr(path_pickle_file, path_plot):
+    """
+    This function loads a dictionary from a pickle file, retrieves the values from the dictionary,
+    and creates a histogram plot of those values. The plot is saved as a file at a specified path.
+
+    The purpose of this function is to visualize the distribution of the values saved in the pickle
+    files by the function 'analyse_and_plot_price_files' of the data_analysis module, like
+    'tot_volume_traded_dict.pkl' or 'pre_event_volume_traded.pkl'.
+
+    Args:
+        path_pickle_file (str): The path to the pickle file containing the dictionary.
+        path_plot (str): The path where the plot file should be saved.
+
+    Example:
+        path_pickle_file = 'path/to/your/pickle/tot_volume_traded_dict.pkl'
+        path_plot = 'path/to/save/your/distr_tot_vol_plot.png'
+        load_tot_vol_dict_and_plot_distr(path_pickle_file, path_plot)
+
+    """
     with open(os.path.join(path_pickle_file), 'rb') as f:
         tot_volume_traded_dict = pickle.load(f)
 
@@ -104,9 +123,8 @@ def load_tot_vol_dict_and_plot_distr(path_pickle_file, path_plot):
     #                 if v!=None
     #                # and v<1000000
     #                 ]
-    list_tot_vol = [v for k, v in tot_volume_traded_dict.items()
-                    if v!=None
-                    ]
+    list_tot_vol = [v for v in tot_volume_traded_dict.values()
+                    if v!=None]
 
     # sns.displot(list_tot_vol_all)
     # plt.savefig(os.path.join(results_dir,'tot_vol_all'))
@@ -114,6 +132,70 @@ def load_tot_vol_dict_and_plot_distr(path_pickle_file, path_plot):
     sns.displot(list_tot_vol, binwidth=20000)
     plt.savefig(os.path.join(path_plot))
     plt.close()
+
+
+def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_plot, limit_volume=None):
+    """
+    This function recursively searches through a directory and its subdirectories for 'name_pickle_file'
+    files. For each 'name_pickle_file' file, it loads the contents using pickle and extends the contents
+    to a list, excluding any None values. The resulting list of total volumes is returned.
+
+    The pickle files with that name are the files saved by the function 'analyse_and_plot_price_files' when
+    analysing price files. This pickle files contain a dictionary where the keys are the price files' names and
+    the values are the value of the feature 'Total volume traded' or of the feature 'Pre-event volume traded'.
+
+    The purpose of this function is to collect all the different values of one of those two feature and plot their
+    distribution.
+
+    Args:
+        results_dir (str): The root directory containing the pickle files.
+        name_pickle_file (str): The name of the pickle files to load.
+        path_plot (str): Path where to save the distribution plot.
+        limit_volume (float or None): Represent the volume above which values are excluded from the plot. it has
+        the purpose of making the plot useful (when very high values are included the plot is useless). Set it
+        to None if no you want no limit.
+
+    Returns:
+        list: A list of total volumes obtained from all 'tot_volume_traded_dict.pkl' files in the given directory
+        and its subdirectories.
+
+    Example:
+
+        results_dir = 'path/to/your/results/directory'
+        name_pickle_file = 'tot_volume_traded_dict.pkl'
+        total_volumes = load_and_plot_all_tot_volume_dicts(results_dir, name_pickle_file)
+
+    """
+    list_tot_volumes = []
+    for root, _, files in alive_it(list(os.walk(results_dir))):
+        for file_name in files:
+            if file_name==name_pickle_file:
+                with open(os.path.join(root, file_name), 'rb') as f:
+                    tot_volume_traded_dict = pickle.load(f)
+                if limit_volume!=None:
+                    list_tot_volumes.extend(
+                        [v for v in tot_volume_traded_dict.values()
+                        if v!=None and
+                        v<limit_volume]
+                    )
+                else:
+                    list_tot_volumes.extend(
+                        [v for v in tot_volume_traded_dict.values()
+                        if v!=None]
+                    )
+
+    sns.displot(list_tot_volumes,
+                #binwidth=binwidth
+                )
+    plt.savefig(os.path.join(path_plot, "distr_tot_volumes"))
+    plt.close()
+
+
+
+    return list_tot_volumes
+
+
+
 
 
 
