@@ -1,6 +1,5 @@
 import betfairutil
 
-from src import betfairutil_copy
 from utils import pricefileutils
 
 PICKLE_FILE_NAME_TOT_VOLUME = 'tot_volume_traded_dict.pkl'
@@ -25,7 +24,7 @@ FUNS_FOR_MB = {
 
 FUNS_FOR_RUNNERS = {
     #'Spread': betfairutil.get_spread,
-    'Spread': betfairutil_copy.get_spread,
+    'Spread': betfairutil.get_spread,
     'Mid price': betfairutil.get_mid_price,
     'OB imbalance': betfairutil.calculate_order_book_imbalance,
     'Last traded price': pricefileutils.get_last_traded_prices_from_runner

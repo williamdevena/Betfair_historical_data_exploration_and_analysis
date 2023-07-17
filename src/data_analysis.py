@@ -60,12 +60,12 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
                 plot_dir_name = file_name.split(".bz2")[0]
                 file_path = os.path.join(root, file_name)
                 plot_path = os.path.join(plot_dir, plot_dir_name)
-                #print(file_path)
+                print(file_path)
 
                 if not os.path.exists(plot_path):
                     os.makedirs(plot_path)
 
-                dict_result = analyse_and_plotting_price_file(price_file_path=file_path,
+                dict_result = analyse_and_plot_price_file(price_file_path=file_path,
                                         results_dir=results_dir)
 
                 dict_aggregate_stats[file_name] = dict_result['aggr_stats']
@@ -101,7 +101,7 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
 
 
 
-def analyse_and_plotting_price_file(price_file_path, results_dir):
+def analyse_and_plot_price_file(price_file_path, results_dir):
     """
     This function analyses a given price file, generates several plots based on its features, calculates aggregate
     statistics, identifies missing data, and returns these results in a dictionary format.
@@ -188,6 +188,7 @@ def extract_features_from_price_file(price_file):
     dict_features = {}
     inplay_idx = pricefileutils.get_last_pre_event_market_book_id_from_prices_file(price_file)
 
+
     for name, function in constants.FUNS_FOR_PRICE_FILE.items():
         dict_features[name] = function(price_file)
 
@@ -199,13 +200,15 @@ def extract_features_from_price_file(price_file):
         )
 
     for name, function in constants.FUNS_FOR_RUNNERS.items():
+        #print(name)
         results = data_processing.apply_function_for_runner_on_entire_price_file(
             price_file_path=price_file,
             function_for_runner=function,
             parameters=constants.PARAMETERS_FOR_FUNCTIONS.get(name, [])
         )
-        for idx, result in enumerate(results):
-            dict_features[name+f"_{idx+1}"] = result
+        if results!=None:
+            for idx, result in enumerate(results):
+                dict_features[name+f"_{idx+1}"] = result
 
     dict_features['Matched'] = list(np.diff(dict_features['Total matched'], prepend=0))
     dict_features['Diff time'] = calculate_avg_time_between_market_books(dict_features['Publish time'])

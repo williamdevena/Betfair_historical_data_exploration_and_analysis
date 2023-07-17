@@ -1,4 +1,71 @@
 import betfairutil
+from betfairlightweight.resources.bettingresources import (MarketBook,
+                                                           MarketCatalogue,
+                                                           PriceSize,
+                                                           RunnerBook)
+
+
+def get_runner_book_from_market_book(
+    market_book,
+    selection_id=None,
+    runner_name=None,
+    #handicap=0.0,
+    return_type=None,
+):
+    """
+    Extract a runner book from the given market book. The runner can be identified either by ID or name
+
+    :param market_book: A market book either as an object whose class provides the mapping interface (e.g. a dict) or as a betfairlightweight MarketBook object. Alternatively can be None - if so, None will be returned
+    :param selection_id: Optionally identify the runner book to extract by the runner's ID
+    :param runner_name: Alternatively identify the runner book to extract by the runner's name
+    :param handicap: The handicap of the desired runner book
+    :param return_type: Optionally specify the return type to be either a dict or RunnerBook. If not given then the return type will reflect the type of market_book; if market_book is a dictionary then the return value is a dictionary. If market_book is a MarketBook object then the return value will be a RunnerBook object
+    :returns: If market_book is None then None. Otherwise, the corresponding runner book if it can be found in the market book, otherwise None. The runner might not be found either because the given selection ID/runner name is not present in the market book or because the market book is missing some required fields such as the market definition. The type of the return value will depend on the return_type parameter
+    :raises: ValueError if both selection_id and runner_name are given. Only one is required to uniquely identify the runner book
+    """
+    #print(runner_name)
+    if market_book is None:
+        return None
+    #print("3")
+
+    if selection_id is not None and runner_name is not None:
+        raise ValueError("Both selection_id and runner_name were given")
+    if return_type is not None and not (
+        return_type is dict or return_type is RunnerBook
+    ):
+        raise TypeError(
+            f"return_type must be either dict or RunnerBook ({return_type} given)"
+        )
+
+    # print("4")
+    if isinstance(market_book, MarketBook):
+        market_book = market_book._data
+        return_type = return_type or RunnerBook
+    else:
+        return_type = return_type or dict
+    # print("5")
+    if selection_id is None:
+        for runner in market_book.get("marketDefinition", {}).get("runners", []):
+            #print(runner.get("name"), runner_name)
+            if runner.get("name") == runner_name:
+                # print("cerca nome per definire sel id")
+                selection_id = runner.get("id")
+                # print(selection_id)
+                break
+        if selection_id is None:
+            return
+    # print("6")
+
+    for runner in market_book.get("runners", []):
+        #print(runner)
+        #print(runner.get("selectionId"), runner.get("handicap"))
+        if (
+            runner.get("selectionId") == selection_id
+            #and runner.get("handicap") == handicap
+        ):
+            #print("7")
+            # print(runner)
+            return return_type(**runner)
 
 
 def get_last_pre_event_market_book_id_from_prices_file(

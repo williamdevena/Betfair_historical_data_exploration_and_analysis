@@ -184,10 +184,12 @@ def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_pl
                         if v!=None]
                     )
 
+    name_plot = name_pickle_file.split(".pkl")[0] + "_total"
+
     sns.displot(list_tot_volumes,
                 #binwidth=binwidth
                 )
-    plt.savefig(os.path.join(path_plot, "distr_tot_volumes"))
+    plt.savefig(os.path.join(path_plot, name_plot))
     plt.close()
 
 
