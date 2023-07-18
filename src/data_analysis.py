@@ -3,15 +3,196 @@ import os
 import pickle
 from pprint import pprint
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from alive_progress import alive_it
 
 from src import constants, data_plotting, data_processing
 from utils import pricefileutils
 
+# def calculate_mean_normalized_matched_volume_time_series(data_path):
 
-def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
+#     SECONDS_OF_1_DAY = 86400
+
+#     dict_total_matched = extract_single_feature_from_multiple_price_files(data_path=data_path,
+#                                                                     feature_name="Total matched")
+
+#     dict_publish_time = extract_single_feature_from_multiple_price_files(data_path=data_path,
+#                                                                     feature_name="Publish time")
+
+#     dict_1_day_from_inplay = {}
+
+#     for file_name, result in dict_publish_time.items():
+#         publish_timestamps = result['Publish time']
+#         # inplay_publish_time = publish_time[result['inplay_idx']]
+
+#         diff_from_inplay = calculate_time_from_inplay(publish_timestamps, result['inplay_idx'])
+#         #print(dict_time_from_inplay[file_name][result['inplay_idx']-10:result['inplay_idx']+4])
+
+#         if min(diff_from_inplay)>-SECONDS_OF_1_DAY:
+#             print("Not enough time before inplay")
+#             continue
+
+#         dict_1_day_from_inplay[file_name] = min([idx for idx, diff_time in enumerate(diff_from_inplay)
+#                                  if diff_time>-SECONDS_OF_1_DAY])
+#         print(dict_1_day_from_inplay[file_name])
+
+
+    #print(dict_time_from_inplay['1.209205488.bz2'][])
+
+    # dict_both_features = {file_name: {'Total matched': result1['Total matched'],
+    #                                   'Publish time': result2['Publish time'],
+    #                                   'inplay_idx': result1['inplay_idx']}
+    #                       for file_name, result1 in }
+
+    # dict_total_matched_with_inplay_idx = {
+    #     file_name: result for file_name, result in dict_total_matched.items()
+    #     if result['inplay_idx']!=None
+    # }
+
+    # distances_from_inplay = [
+    #     result['inplay_idx'] for file_name, result in dict_total_matched_with_inplay_idx.items()
+    # ]
+
+    #min_distance_from_inplay = min(distances_from_inplay)
+
+    #print(min_distance_from_inplay, np.mean(distances_from_inplay), max(distances_from_inplay))
+
+    # list_total_matched = [result["Total matched"][result['inplay_idx']-min_distance_from_inplay:result['inplay_idx']]
+    #                  for file_name, result in dict_total_matched_with_inplay_idx.items()]
+
+    # list_normalized_total_matched = [[volume/max(total_matched) for volume in total_matched]
+    #                                  for total_matched in list_total_matched]
+
+    # return [np.mean(v) for v in zip(*list_normalized_total_matched)], list_normalized_total_matched
+
+
+
+# def calculate_mean_time_series_of_feature(data_path, feature_name):
+#     dict_results = extract_single_feature_from_multiple_price_files(data_path=data_path,
+#                                                                    feature_name=feature_name)
+
+#     dict_results_with_inplay_idx = {
+#         file_name: result for file_name, result in dict_results.items()
+#         if result['inplay_idx']!=None
+#     }
+
+#     min_distance_from_inplay = min([
+#         result['inplay_idx'] for file_name, result in dict_results_with_inplay_idx.items()
+#     ])
+#     print(min_distance_from_inplay)
+
+#     ## TAKING ONLY 100 VALUES BEFORE INPLAY STARTS
+#     list_features = [result[feature_name][result['inplay_idx']-min_distance_from_inplay:result['inplay_idx']]
+#                      for file_name, result in dict_results_with_inplay_idx.items()]
+
+#     return [np.mean(k) for k in zip(*list_features)], list_features
+
+
+
+def calculate_and_plot_mean_correlation_matrix(data_path, path_plot):
+    list_corr_matrices = []
+
+    for root, _, files in alive_it(list(os.walk(data_path))):
+        for file_name in files:
+            if ".bz2" in file_name:
+                # plot_dir_name = file_name.split(".bz2")[0]
+                file_path = os.path.join(root, file_name)
+                # plot_path = os.path.join(plot_dir, plot_dir_name)
+                print(file_path)
+
+                # if not os.path.exists(plot_path):
+                #     os.makedirs(plot_path)
+
+                # dict_result = analyse_and_plot_price_file(price_file_path=file_path,
+                #                         results_dir=results_dir)
+                dict_features, inplay_idx = extract_features_from_price_file(price_file=file_path)
+
+                dict_features_only_lists = {feature_name: feature for feature_name, feature in dict_features.items()
+                                        if isinstance(feature, list)}
+
+                df_features = pd.DataFrame.from_dict({k: v for k, v in dict_features_only_lists.items()
+                                                    if k!='Pre-event diff time' and
+                                                    k!='In-play diff time' and
+                                                    k!='Normalized matched'})
+
+                corr_matrix = df_features.corr()
+                list_corr_matrices.append(corr_matrix)
+
+    # for corr_matrix in list_corr_matrices:
+    #     for x in corr_matrix:
+    #         print(x)
+
+    mean_matrix = np.mean(list_corr_matrices, axis=0)
+
+    f, ax = plt.subplots(figsize=(12, 9))
+    mask = np.triu(mean_matrix)
+    sns.heatmap(mean_matrix, square=False, annot=True, xticklabels=[col for col in list_corr_matrices[0]],
+            yticklabels=[col for col in list_corr_matrices[0]],
+            fmt='.2f',
+            mask=mask)
+    f.tight_layout()
+    plt.savefig(path_plot)
+    plt.close()
+
+
+    return mean_matrix
+
+
+
+
+
+
+
+def extract_single_feature_from_multiple_price_files(data_path, feature_name):
+    dict_results = {}
+
+    for root, _, files in alive_it(list(os.walk(data_path))):
+        for file_name in files:
+            if ".bz2" in file_name:
+                file_path = os.path.join(root, file_name)
+                dict_results[file_name] = {}
+
+                dict_results[file_name]['inplay_idx'] = pricefileutils.get_last_pre_event_market_book_id_from_prices_file(file_path)
+                dict_results[file_name][feature_name] = extract_single_feature_from_price_file(price_file=file_path,
+                                                                feature_name=feature_name)
+
+
+    return dict_results
+
+
+
+
+
+
+def extract_single_feature_from_price_file(price_file, feature_name):
+    if feature_name in constants.FUNS_FOR_PRICE_FILE:
+        return constants.FUNS_FOR_PRICE_FILE[feature_name](price_file)
+
+    elif feature_name in constants.FUNS_FOR_MB:
+        return data_processing.apply_function_for_mb_on_entire_price_file(
+            price_file_path=price_file,
+            function_for_mb=constants.FUNS_FOR_MB[feature_name],
+            parameters=constants.PARAMETERS_FOR_FUNCTIONS.get(feature_name, [])
+        )
+
+    elif feature_name in constants.FUNS_FOR_RUNNERS:
+        return data_processing.apply_function_for_runner_on_entire_price_file(
+            price_file_path=price_file,
+            function_for_runner=constants.FUNS_FOR_RUNNERS[feature_name],
+            parameters=constants.PARAMETERS_FOR_FUNCTIONS.get(feature_name, [])
+        )
+
+    else:
+        return None
+
+
+
+
+
+def analyse_and_plot_multiple_price_files(data_path, results_dir, save_result_in_pickle):
     """
     This function traverses through a given directory, analyses and generates plots for every price file found,
     and saves the result in pickle files. It calculates aggregate statistics, identifies missing data,
@@ -53,6 +234,7 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
     dict_missing_data = {}
     dict_tot_volume_traded = {}
     dict_pre_event_vol_traded = {}
+    dict_all_results = {}
 
     for root, _, files in alive_it(list(os.walk(data_path))):
         for file_name in files:
@@ -67,6 +249,8 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
 
                 dict_result = analyse_and_plot_price_file(price_file_path=file_path,
                                         results_dir=results_dir)
+
+                dict_all_results[file_name] = dict_result
 
                 dict_aggregate_stats[file_name] = dict_result['aggr_stats']
                 dict_missing_data[file_name] = dict_result['missing_data']
@@ -96,7 +280,8 @@ def analyse_and_plot_price_files(data_path, results_dir, save_result_in_pickle):
     return {'aggr_stats': dict_aggregate_stats,
             'missing_data': dict_missing_data,
             'tot_vol_traded': dict_tot_volume_traded,
-            'pre_event_vol_traded': dict_pre_event_vol_traded}
+            'pre_event_vol_traded': dict_pre_event_vol_traded,
+            'dict_all_results': dict_all_results}
 
 
 
@@ -161,7 +346,8 @@ def analyse_and_plot_price_file(price_file_path, results_dir):
     return {'aggr_stats': df_aggregate_stats,
             'missing_data': df_missing_data,
             'tot_vol_traded': dict_features['Total volume traded'],
-            'pre_event_vol_traded': dict_features['Pre-event volume']}
+            'pre_event_vol_traded': dict_features['Pre-event volume'],
+            'dict_features': dict_features}
 
 
 
@@ -211,6 +397,9 @@ def extract_features_from_price_file(price_file):
                 dict_features[name+f"_{idx+1}"] = result
 
     dict_features['Matched'] = list(np.diff(dict_features['Total matched'], prepend=0))
+    final_matched_volume = max(dict_features['Total matched'])
+    if final_matched_volume>0:
+        dict_features['Normalized matched'] = [volume/final_matched_volume for volume in dict_features['Total matched']]
     dict_features['Diff time'] = calculate_avg_time_between_market_books(dict_features['Publish time'])
 
     # print(f"Event name: {dict_features['Name']}")
@@ -252,6 +441,16 @@ def calculate_avg_time_between_market_books(list_timestamps):
 
     diffs_seconds = [diff.total_seconds() for diff in diffs]
     diffs_seconds.append(0)
+
+    return diffs_seconds
+
+
+
+def calculate_time_from_inplay(list_timestamps, inplay_idx):
+    diffs = [(timestamp-list_timestamps[inplay_idx])
+            for idx, timestamp in enumerate(list_timestamps)]
+
+    diffs_seconds = [diff.total_seconds() for diff in diffs]
 
     return diffs_seconds
 

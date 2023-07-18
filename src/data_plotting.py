@@ -51,6 +51,7 @@ def plot_dict_features_from_price_file(dict_features, inplay_idx, plot_path):
         else:
             plt.title(feature_name)
 
+        plt.xlabel("# Orders arrived")
         plt.savefig(os.path.join(plot_path, feature_name))
         plt.close()
 
@@ -134,7 +135,7 @@ def load_dict_from_pickle_and_plot_distr(path_pickle_file, path_plot):
     plt.close()
 
 
-def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_plot, limit_volume=None):
+def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_plot, binwidth=1000, limit_volume=None):
     """
     This function recursively searches through a directory and its subdirectories for 'name_pickle_file'
     files. For each 'name_pickle_file' file, it loads the contents using pickle and extends the contents
@@ -176,6 +177,7 @@ def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_pl
                     list_tot_volumes.extend(
                         [v for v in tot_volume_traded_dict.values()
                         if v!=None and
+                        #v>0 and
                         v<limit_volume]
                     )
                 else:
@@ -184,11 +186,26 @@ def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_pl
                         if v!=None]
                     )
 
+    sorted_list = sorted(list_tot_volumes)
+    idx_95_perc = int(len(list_tot_volumes)*0.95)
+    value_95_perc = sorted_list[idx_95_perc]
+    mean_value = np.mean(list_tot_volumes)
+    median_value = np.median(list_tot_volumes)
+
+    print(f"Mean: {mean_value}")
+    print(f"Median: {median_value}")
+    print(f"95th percentile: {value_95_perc}")
+
     name_plot = name_pickle_file.split(".pkl")[0] + "_total"
 
     sns.displot(list_tot_volumes,
-                #binwidth=binwidth
+                binwidth=binwidth,
+                kde=True,
                 )
+    plt.axvline(value_95_perc, color='red', label="95th percentile")
+    plt.axvline(np.mean(list_tot_volumes), color='blue', label="Mean")
+    plt.axvline(np.median(list_tot_volumes), color='green', label="Median")
+    plt.legend()
     plt.savefig(os.path.join(path_plot, name_plot))
     plt.close()
 
