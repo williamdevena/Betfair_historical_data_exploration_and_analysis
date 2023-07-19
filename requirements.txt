@@ -1,0 +1,12 @@
+alive_progress==3.1.4
+betfairlightweight==2.17.2
+betfairutil==0.6.2
+matplotlib==3.7.1
+numpy==1.23.5
+numpy==1.24.3
+orjson==3.9.2
+pandas==1.5.3
+pandas==2.0.2
+python-dotenv==1.0.0
+seaborn==0.12.2
+smart_open==6.3.0

@@ -19,6 +19,17 @@ The scripts in this repository allow users to:
 - Plot the distribution of different features
 - Extract specific features from the price files
 
+
+## Prerequisites
+ Check the **requirements.txt** file.
+
+ Use the following command to install the necessary packages:
+ <pre>
+pip install -r requirements.txt
+ </pre>
+
+
+
 ## Usage
 To run the exploration and analysis of the price files, please follow these steps:
 
