@@ -13,3 +13,4 @@ results*
 main_old.py
 .env
 not_for_git*
+.DS_Store
