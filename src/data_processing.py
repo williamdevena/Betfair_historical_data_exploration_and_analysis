@@ -1,3 +1,7 @@
+"""
+This module contains functions necessary to process and parse the Betfair price files (in addition to the ones from the betfairutil library).
+"""
+
 import bz2
 import json
 import os
@@ -46,21 +50,11 @@ def apply_function_for_runner_on_entire_price_file(price_file_path, function_for
     """
     market_books = betfairutil.read_prices_file(price_file_path)
 
-    #runners = [runner['name'] for runner in market_books[0]['marketDefinition']['runners']]
     all_runners_names = set(tuple(list_runners) for list_runners in
             [[runner['name'] for runner in mb['marketDefinition']['runners']]
              for mb in market_books])
 
-    # print(
-    #     set(tuple(list_runners) for list_runners in
-    #         [[runner['name'] for runner in mb['marketDefinition']['runners']]
-    #          for mb in market_books])
-
-    #     )
-
-
     if len(all_runners_names)==1:
-        #print(all_runners_names)
         runners = list(list(all_runners_names)[0])
         result = [
             [
@@ -73,6 +67,7 @@ def apply_function_for_runner_on_entire_price_file(price_file_path, function_for
 
         return result
 
+    ### This is case is when the runner name get changed during the match
     else:
         return None
 

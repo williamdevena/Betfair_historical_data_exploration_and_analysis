@@ -3,6 +3,7 @@ import betfairutil
 from utils import pricefileutils
 
 PICKLE_FILE_NAME_TOT_VOLUME = 'tot_volume_traded_dict.pkl'
+PICKLE_FILE_NAME_PRE_EVENT_VOLUME = 'pre_event_volume_traded.pkl'
 NAME_PLOT_TOT_VOLUME = 'tot_volume_distr'
 NAME_PLOT_PRE_EVENT_VOLUME = 'pre_event_volume_distr'
 

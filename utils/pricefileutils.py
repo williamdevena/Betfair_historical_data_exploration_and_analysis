@@ -1,7 +1,12 @@
+"""
+This module contains functions that represent modifications of the functions of the betfairutil library, useful for the parsing
+of Betfair price files.
+
+It also contains additional functions useful to extract information from the price files (functions not present in the betfairutil library).
+"""
+
 import betfairutil
 from betfairlightweight.resources.bettingresources import (MarketBook,
-                                                           MarketCatalogue,
-                                                           PriceSize,
                                                            RunnerBook)
 
 
@@ -23,10 +28,8 @@ def get_runner_book_from_market_book(
     :returns: If market_book is None then None. Otherwise, the corresponding runner book if it can be found in the market book, otherwise None. The runner might not be found either because the given selection ID/runner name is not present in the market book or because the market book is missing some required fields such as the market definition. The type of the return value will depend on the return_type parameter
     :raises: ValueError if both selection_id and runner_name are given. Only one is required to uniquely identify the runner book
     """
-    #print(runner_name)
     if market_book is None:
         return None
-    #print("3")
 
     if selection_id is not None and runner_name is not None:
         raise ValueError("Both selection_id and runner_name were given")
@@ -37,34 +40,24 @@ def get_runner_book_from_market_book(
             f"return_type must be either dict or RunnerBook ({return_type} given)"
         )
 
-    # print("4")
     if isinstance(market_book, MarketBook):
         market_book = market_book._data
         return_type = return_type or RunnerBook
     else:
         return_type = return_type or dict
-    # print("5")
     if selection_id is None:
         for runner in market_book.get("marketDefinition", {}).get("runners", []):
-            #print(runner.get("name"), runner_name)
             if runner.get("name") == runner_name:
-                # print("cerca nome per definire sel id")
                 selection_id = runner.get("id")
-                # print(selection_id)
                 break
         if selection_id is None:
             return
-    # print("6")
 
     for runner in market_book.get("runners", []):
-        #print(runner)
-        #print(runner.get("selectionId"), runner.get("handicap"))
         if (
             runner.get("selectionId") == selection_id
             #and runner.get("handicap") == handicap
         ):
-            #print("7")
-            # print(runner)
             return return_type(**runner)
 
 
@@ -79,12 +72,8 @@ def get_last_pre_event_market_book_id_from_prices_file(
     :return: The last pre-event market book, where the status is not SUSPENDED if filter_suspended has been set to True, provided one such market book exists in the prices file. If not then None will be returned
     """
     g = betfairutil.create_market_book_generator_from_prices_file(path_to_prices_file)
-    # pre_event_market_book = None
-    #len(g)
     for idx, market_book in enumerate(g):
-        #print(idx)
         if market_book["inplay"]:
-            #print("trovato inplay")
             return idx
         # if not filter_suspended or market_book["status"] != "SUSPENDED":
         #     pre_event_market_book = market_book
@@ -92,7 +81,6 @@ def get_last_pre_event_market_book_id_from_prices_file(
 
 
 def get_last_traded_prices_from_runner(runner_book):
-    #return runner_book['lastPriceTraded']
     last_price = runner_book.get('lastPriceTraded', 0)
 
     if last_price!=None:
@@ -118,9 +106,6 @@ def get_event_date(price_file):
     market_books = betfairutil.read_prices_file(price_file)
 
     return market_books[0]['marketDefinition']['openDate']
-
-
-
 
 
 

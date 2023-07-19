@@ -1,4 +1,7 @@
-import logging
+"""
+This module contains all the necessary function to plot the data. these functions are called by the ones in the data_analysis module.
+"""
+
 import os
 import pickle
 import warnings
@@ -56,6 +59,7 @@ def plot_dict_features_from_price_file(dict_features, inplay_idx, plot_path):
         plt.close()
 
         ## DISTRIBUTION PLOT
+        ## Note: This was commented out due to too much time to calculate
         # sns.displot(feature, label=feature_name)
         # plt.legend()
         # plt.title(feature_name+" distribution")
@@ -84,6 +88,15 @@ def plot_correlation_matrix(df_features, plot_path):
 
 
 def plot_distr_volume_traded(dict_volume_traded, path_plot, binwidth):
+    """
+    This function plots a histogram of the total volume traded for different files.
+    The histogram is saved to a file specified by path_plot.
+
+    Args:
+        dict_volume_traded (dict): Dictionary with keys being file names and values being the total volume traded in the corresponding file.
+        path_plot (str): The path to the directory where the plot will be saved.
+        binwidth (int): The size of the bins for the histogram.
+    """
     list_tot_vol = [v for k, v in dict_volume_traded.items()
                     if v!=None
                     ]
@@ -116,20 +129,11 @@ def load_dict_from_pickle_and_plot_distr(path_pickle_file, path_plot):
 
     """
     with open(os.path.join(path_pickle_file), 'rb') as f:
-        tot_volume_traded_dict = pickle.load(f)
+        pickle_data_dict = pickle.load(f)
 
-
-    #print(tot_volume_traded_dict)
-    # list_tot_vol_all = [v for k, v in tot_volume_traded_dict.items()
-    #                 if v!=None
-    #                # and v<1000000
-    #                 ]
-    list_tot_vol = [v for v in tot_volume_traded_dict.values()
+    list_tot_vol = [v for v in pickle_data_dict.values()
                     if v!=None]
 
-    # sns.displot(list_tot_vol_all)
-    # plt.savefig(os.path.join(results_dir,'tot_vol_all'))
-    # plt.close()
     sns.displot(list_tot_vol, binwidth=20000)
     plt.savefig(os.path.join(path_plot))
     plt.close()
@@ -208,8 +212,6 @@ def load_and_plot_all_volume_pickle_files(results_dir, name_pickle_file, path_pl
     plt.legend()
     plt.savefig(os.path.join(path_plot, name_plot))
     plt.close()
-
-
 
     return list_tot_volumes
 

@@ -70,7 +70,6 @@ def get_bet_names_for_each_event(events_folder):
     """
     dict_names_and_events = {}
     for root, _, files in alive_it(list(os.walk(events_folder))):
-        #print(root)
         for file in files:
             if ".bz2" in file:
                 market_books = betfairutil.read_prices_file(os.path.join(root, file))
