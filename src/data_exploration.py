@@ -20,21 +20,11 @@ def data_exploration():
     data_directory = os.environ.get("DATA_DIRECTORY")
 
 
-    ## CALCULATE MEAN CORRELATION MATRIX
-    # data_path = os.path.join(data_directory, "djokovic_match_odds")
-    # data_path = os.path.join(data_directory, "match_odds")
-    # mean_matrix = data_analysis.calculate_and_plot_mean_correlation_matrix(data_path=data_path,
-    #                                                                        path_plot="./mean_corr_matrix_all_days")
-
-
-
     ### ANALYSE SINGLE PRICE FILE
     # file_path = os.path.join(data_directory, "match_odds/19/32035350/1.208791811.bz2")
     # results_dir = "./results_test"
     # dict_result = data_analysis.analyse_and_plot_price_file(price_file_path=file_path,
     #                                     results_dir=results_dir)
-
-
 
 
 
@@ -49,7 +39,6 @@ def data_exploration():
     # dict_result = data_analysis.analyse_and_plot_multiple_price_files(data_path=data_path,
     #                                         results_dir=results_dir,
     #                                         save_result_in_pickle=True)
-
 
 
 
@@ -75,6 +64,13 @@ def data_exploration():
 
 
 
+    # # CALCULATE MEAN CORRELATION MATRIX
+    # data_path = os.path.join(data_directory, "djokovic_match_odds")
+    # data_path = os.path.join(data_directory, "match_odds")
+    # mean_matrix = data_analysis.calculate_and_plot_mean_correlation_matrix(data_path=data_path,
+    #                                                                        path_plot="./mean_corr_matrix_all_days")
+
+
 
 
     # ## LOAD DATA ON TOTAL VOLUME TRADED
@@ -84,8 +80,6 @@ def data_exploration():
     #                                                                              constants.PICKLE_FILE_NAME_TOT_VOLUME),
     #                                                    path_plot=os.path.join(results_dir,
     #                                                                       constants.NAME_PLOT_TOT_VOLUME))
-
-
 
 
 
@@ -114,7 +108,6 @@ def data_exploration():
     #     name_pickle_file=constants.PICKLE_FILE_NAME_PRE_EVENT_VOLUME,
     #     limit_volume=10000,
     #     binwidth=200,
-
     # )
 
 
