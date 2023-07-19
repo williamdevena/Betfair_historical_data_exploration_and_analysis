@@ -6,7 +6,7 @@ In particular, it reads, parses, analyses and plots data stored in files with ".
 The scripts in this repository allow users to:
 
 - Analyse and plot data from price files in a folder or in multiple folders
-- Calculate and extract avrious features such as:
+- Calculate and extract various features such as:
     - Available volume back
     - Available volume lay
     - Last traded price
@@ -18,6 +18,7 @@ The scripts in this repository allow users to:
 - Explore and visualize correlations among different features
 - Plot the distribution of different features
 - Extract specific features from the price files
+- and others
 
 
 ## Prerequisites
