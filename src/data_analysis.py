@@ -7,6 +7,7 @@ import os
 import pickle
 from pprint import pprint
 
+import betfairutil
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

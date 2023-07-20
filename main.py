@@ -12,7 +12,7 @@ import pandas as pd
 import seaborn as sns
 from alive_progress import alive_it
 
-from src import data_exploration
+from src import data_analysis, data_exploration
 
 
 def main():
@@ -20,8 +20,8 @@ def main():
     dotenv.load_dotenv()
     data_directory = os.environ.get("DATA_DIRECTORY")
 
-    ## DATA EXPLORATION
-    data_exploration.data_exploration()
+    # ## DATA EXPLORATION
+    # data_exploration.data_exploration()
 
     ## PRINT BET NAMES FOR EACH EVENT IN DATA FOLDER
     # event_folder = os.path.join(data_directory, "djokovic/29")

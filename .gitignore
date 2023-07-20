@@ -14,3 +14,4 @@ main_old.py
 .env
 not_for_git*
 .DS_Store
+mb_example.txt
