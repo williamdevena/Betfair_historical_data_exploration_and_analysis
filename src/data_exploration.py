@@ -21,10 +21,10 @@ def data_exploration():
 
 
     ### ANALYSE SINGLE PRICE FILE
-    file_path = os.path.join(data_directory, "match_odds/19/32035350/1.208791811.bz2")
-    results_dir = "./results_test"
-    dict_result = data_analysis.analyse_and_plot_price_file(price_file_path=file_path,
-                                        results_dir=results_dir)
+    # file_path = os.path.join(data_directory, "match_odds/19/32035350/1.208791811.bz2")
+    # results_dir = "./results_test"
+    # dict_result = data_analysis.analyse_and_plot_price_file(price_file_path=file_path,
+    #                                     results_dir=results_dir)
 
 
 
@@ -43,24 +43,24 @@ def data_exploration():
 
 
 
-    # ## ANALYSE ENTIRE DATA FOLDER (CONTAINING MULTIPLE DAYS)
-    # ## This piece of code is useful is you have a directory of price files
-    # ## divided in days, like the structure of the data downloaded from the
-    # ## Betfair hstorical data service.
-    # ## Example of data of January 2023: "2023/Jan/1", "2023/Jan/2", ..., "2023/Jan/31"
-    # data_path = os.path.join(data_directory, "djokovic_match_odds_little")
-    # for day_of_the_month in range(29, 32):
-    #     day_folder_path = os.path.join(data_path, str(day_of_the_month))
-    #     results_dir = f"./results_for_thesis/results_{day_of_the_month}"
+    ## ANALYSE ENTIRE DATA FOLDER (CONTAINING MULTIPLE DAYS)
+    ## This piece of code is useful is you have a directory of price files
+    ## divided in days, like the structure of the data downloaded from the
+    ## Betfair hstorical data service.
+    ## Example of data of January 2023: "2023/Jan/1", "2023/Jan/2", ..., "2023/Jan/31"
+    data_path = os.path.join(data_directory, "djokovic_match_odds_little")
+    for day_of_the_month in range(29, 32):
+        day_folder_path = os.path.join(data_path, str(day_of_the_month))
+        results_dir = f"./results_for_thesis/results_{day_of_the_month}"
 
-    #     ## the if statement is in case in the data directory you don't have all the days continuosly
-    #     ## (if you skip some days) and in case you have already analyzed some of
-    #     ## the days' folder and produced the plots (hence the 'results_dir' directory
-    #     ## already exists).
-    #     if os.path.exists(day_folder_path) and not os.path.exists(results_dir):
-    #         data_analysis.analyse_and_plot_price_files(data_path=day_folder_path,
-    #                                                 results_dir=results_dir,
-    #                                                 save_result_in_pickle=True)
+        ## the if statement is in case in the data directory you don't have all the days continuosly
+        ## (if you skip some days) and in case you have already analyzed some of
+        ## the days' folder and produced the plots (hence the 'results_dir' directory
+        ## already exists).
+        if os.path.exists(day_folder_path) and not os.path.exists(results_dir):
+            data_analysis.analyse_and_plot_multiple_price_files(data_path=day_folder_path,
+                                                    results_dir=results_dir,
+                                                    save_result_in_pickle=True)
 
 
 
